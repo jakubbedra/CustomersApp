@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Data;
@@ -38,7 +39,8 @@ public class CustomerListViewModel : INotifyPropertyChanged
         set
         {
             _selectedCustomer = value;
-            SelectedCustomerState = $"{_selectedCustomer.Name} {_selectedCustomer.Surname}";
+            if (_selectedCustomer != null)
+                SelectedCustomerState = $"{_selectedCustomer.Name} {_selectedCustomer.Surname}";
             OnPropertyChanged(nameof(SelectedCustomer));
         }
     }
@@ -60,6 +62,7 @@ public class CustomerListViewModel : INotifyPropertyChanged
     public ICommand DeleteCustomerCommand { get; set; }
     public ICommand GeneratePdfCommand { get; set; }
     public ICommand UpdateCustomerCommand { get; set; }
+    public SearchCriteria SelectedSearchCriteria { get; set; }
 
     private CustomerService _customerService;
     private PdfService _pdfService;
@@ -68,6 +71,7 @@ public class CustomerListViewModel : INotifyPropertyChanged
 
     public CustomerListViewModel()
     {
+        SelectedSearchCriteria = SearchCriteria.NameAndSurname;
         CustomerFilter = string.Empty;
         _customerService = ServiceProvider.CustomerServiceInstance();
         _pdfService = ServiceProvider.PdfServiceInstance();
@@ -107,15 +111,74 @@ public class CustomerListViewModel : INotifyPropertyChanged
     {
         if (obj is Customer customer)
         {
-            return customer.Name.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase) ||
-                   customer.Surname.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase) ||
-                   (customer.Name + " " + customer.Surname).Contains(CustomerFilter,
-                       StringComparison.InvariantCultureIgnoreCase) ||
-                   (customer.Surname + " " + customer.Name).Contains(CustomerFilter,
-                       StringComparison.InvariantCultureIgnoreCase);
+            if (CustomerFilter != null && CustomerFilter != "")
+            {
+                SelectedCustomerState = StateNoData;
+            }
+
+            switch (SelectedSearchCriteria)
+            {
+                case SearchCriteria.NameAndSurname:
+                    return customer.Name.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase) ||
+                           customer.Surname.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase) ||
+                           (customer.Name + " " + customer.Surname).Contains(CustomerFilter,
+                               StringComparison.InvariantCultureIgnoreCase) ||
+                           (customer.Surname + " " + customer.Name).Contains(CustomerFilter,
+                               StringComparison.InvariantCultureIgnoreCase);
+                case SearchCriteria.CertificateNumber:
+                    return FilterNormalString(customer.CertificateNumber);
+                case SearchCriteria.DeathCertificateNumber:
+                    return FilterNormalString(customer.DeathCertificateNumber);
+                case SearchCriteria.Sex:
+                    return FilterNormalString(customer.Sex.ToString());
+                case SearchCriteria.Address:
+                    return FilterNormalString(customer.Address);
+                case SearchCriteria.PlaceOfBirth:
+                    return FilterNormalString(customer.PlaceOfBirth);
+                case SearchCriteria.PlaceOfDeath:
+                    return FilterNormalString(customer.PlaceOfDeath);
+                case SearchCriteria.IssuedBy:
+                    return FilterNormalString(customer.IssuedBy);
+                case SearchCriteria.DateOfBirth:
+                    return FilterDate(customer.DateOfBirth);
+                case SearchCriteria.DateOfDeath:
+                    return FilterDate(customer.DateOfDeath);
+                case SearchCriteria.IssueDate:
+                    return FilterDate(customer.IssueDate);
+                default:
+                    return false;
+            }
         }
 
         return false;
+    }
+
+    private bool FilterDate(DateOnly? date)
+    {
+        if (date == null)
+        {
+            return false;
+        }
+
+        DateTime dateTime;
+        if (DateTime.TryParseExact(CustomerFilter, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
+                out dateTime))
+        {
+            DateOnly filterDate = new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
+            return filterDate == date;
+        }
+
+        return false;
+    }
+
+    private bool FilterNormalString(string? value)
+    {
+        if (value == null)
+        {
+            return false;
+        }
+
+        return value.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -205,6 +268,9 @@ public class CustomerListViewModel : INotifyPropertyChanged
         if (_selectedCustomer != null)
         {
             _customerService.UpdateCustomer(_selectedCustomer);
+            SelectedCustomerState = $"{_selectedCustomer.Name} {_selectedCustomer.Surname}";
+            MessageBox.Show("Zapisywanie zmian ukończone pomyślnie!", "Sukces", MessageBoxButton.OK,
+                MessageBoxImage.Information);
         }
         else
         {

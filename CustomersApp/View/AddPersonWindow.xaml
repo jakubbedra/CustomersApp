@@ -83,7 +83,6 @@
             </StackPanel>
         </Grid>
         <Grid Row="1" VerticalAlignment="Bottom">
-            <!--close the window and display INFO box window-->
             <Button Content="Dodaj zmarłego" Command="{Binding AddCustomerCommand}" Height="50" Margin="10"/>
         </Grid>
     </Grid>

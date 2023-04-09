@@ -24,13 +24,10 @@ public class MockDataGenerator
                 .RuleFor(c => c.IssueDate, x => x.Date.RecentDateOnly())
                 .RuleFor(c => c.Address, x => x.Company.Locale);
         List<Customer> customers = new List<Customer>();
-        long currId = 2;
         for (int i = 0; i < 1000; i++)
         {
             var generate = customerFaker.Generate();
-            generate.Id = currId;
             customers.Add(generate);
-            currId++;
         }
 
         return customers;
