@@ -1,0 +1,10 @@
+#yaml template for config file, should be moved to the execution directory when running the app
+---
+database:
+  - server: localhost
+    port: 2137
+    database: Customers-new
+    user_id: postgres
+    password: admin
+log_in_screen:
+  - password: kremufka2137
