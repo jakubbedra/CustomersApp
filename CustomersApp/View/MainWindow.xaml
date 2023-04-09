@@ -12,6 +12,7 @@
     <Window.Resources>
         <viewModel:CustomerListViewModel x:Key="vm" />
         <converters:DateTimeToDateOnlyConverter x:Key="DateOnlyConverter" />
+        <converters:SearchCriteriaToStringConverter x:Key="SearchCriteriaConverter" />
         <converters:SexConverter x:Key="SexConverter" />
     </Window.Resources>
     <Grid Name="MainGrid" Height="720" Width="1080" DataContext="{StaticResource vm}">
@@ -25,7 +26,7 @@
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200"></ColumnDefinition>
+                <ColumnDefinition Width="250"></ColumnDefinition>
                 <ColumnDefinition Width="100"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
@@ -34,7 +35,7 @@
                 <RowDefinition Height="18"></RowDefinition>
                 <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0">Wyszukiwanie</TextBlock>
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="{Binding SelectedSearchCriteria, Converter={StaticResource SearchCriteriaConverter}}"/>
             <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding CustomerFilter, UpdateSourceTrigger=PropertyChanged}"></TextBox>
             <Button Grid.Row="1" Grid.Column="1" HorizontalAlignment="Right" Width="75" Command="{Binding RefreshCustomersCommand}">Szukaj</Button>
             <TextBlock Grid.Row="0" Grid.Column="1">Filtr</TextBlock>
@@ -49,9 +50,8 @@
                     <ComboBoxItem Content="Data śmierci" Tag="{x:Static viewModel:SearchCriteria.DateOfDeath}"/>
                     <ComboBoxItem Content="Miejsce śmierci" Tag="{x:Static viewModel:SearchCriteria.PlaceOfDeath}"/>
                     <ComboBoxItem Content="Numer aktu zgonu" Tag="{x:Static viewModel:SearchCriteria.DeathCertificateNumber}"/>
-                    <ComboBoxItem Content="Akt zgonu wydany przez" Tag="{x:Static viewModel:SearchCriteria.Sex}"/>
-                    <ComboBoxItem Content="Data wydania aktu zgonu" Tag="{x:Static viewModel:SearchCriteria.Sex}"/>
-                    <ComboBoxItem Content="Płeć" Tag="{x:Static viewModel:SearchCriteria.Sex}"/>
+                    <ComboBoxItem Content="Akt zgonu wydany przez" Tag="{x:Static viewModel:SearchCriteria.IssuedBy}"/>
+                    <ComboBoxItem Content="Data wydania aktu zgonu" Tag="{x:Static viewModel:SearchCriteria.IssueDate}"/>
                 </ComboBox>
             </StackPanel>
             <Button Grid.Row="1" Grid.Column="3" Click="OnAdd">Dodaj</Button>

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -62,7 +64,18 @@ public class CustomerListViewModel : INotifyPropertyChanged
     public ICommand DeleteCustomerCommand { get; set; }
     public ICommand GeneratePdfCommand { get; set; }
     public ICommand UpdateCustomerCommand { get; set; }
-    public SearchCriteria SelectedSearchCriteria { get; set; }
+
+    private SearchCriteria _selectedSearchCriteria;
+
+    public SearchCriteria SelectedSearchCriteria
+    {
+        get { return _selectedSearchCriteria; }
+        set
+        {
+            _selectedSearchCriteria = value;
+            OnPropertyChanged(nameof(SelectedSearchCriteria));
+        }
+    }
 
     private CustomerService _customerService;
     private PdfService _pdfService;
@@ -119,12 +132,9 @@ public class CustomerListViewModel : INotifyPropertyChanged
             switch (SelectedSearchCriteria)
             {
                 case SearchCriteria.NameAndSurname:
-                    return customer.Name.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase) ||
-                           customer.Surname.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase) ||
-                           (customer.Name + " " + customer.Surname).Contains(CustomerFilter,
-                               StringComparison.InvariantCultureIgnoreCase) ||
-                           (customer.Surname + " " + customer.Name).Contains(CustomerFilter,
-                               StringComparison.InvariantCultureIgnoreCase);
+                    return FilterNormalString(customer.Name) || FilterNormalString(customer.Surname) ||
+                           FilterNormalString(customer.Name + " " + customer.Surname) ||
+                           FilterNormalString(customer.Surname + " " + customer.Name);
                 case SearchCriteria.CertificateNumber:
                     return FilterNormalString(customer.CertificateNumber);
                 case SearchCriteria.DeathCertificateNumber:
@@ -178,6 +188,28 @@ public class CustomerListViewModel : INotifyPropertyChanged
             return false;
         }
 
+        // invariant culture did not seem to work, so here is a workaround
+        //string normalizedFilter = new string(CustomerFilter).ToLower()
+        //    .Replace('ą', 'a')
+        //    .Replace('ć', 'c')
+        //    .Replace('ę', 'e')
+        //    .Replace('ł', 'l')
+        //    .Replace('ó', 'o')
+        //    .Replace('ś', 's')
+        //    .Replace('ń', 'n')
+        //    .Replace('ż', 'z')
+        //    .Replace('ź', 'z');
+        //string normalizedName = new string(value).ToLower()
+        //    .Replace('ą', 'a')
+        //    .Replace('ć', 'c')
+        //    .Replace('ę', 'e')
+        //    .Replace('ł', 'l')
+        //    .Replace('ó', 'o')
+        //    .Replace('ś', 's')
+        //    .Replace('ń', 'n')
+        //    .Replace('ż', 'z')
+        //    .Replace('ź', 'z');
+        //return normalizedName.Contains(normalizedFilter, StringComparison.InvariantCultureIgnoreCase);
         return value.Contains(CustomerFilter, StringComparison.InvariantCultureIgnoreCase);
     }
 

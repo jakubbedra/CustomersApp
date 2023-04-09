@@ -11,12 +11,6 @@ namespace CustomersApp.ViewModel;
 
 public class AddPersonViewModel : INotifyPropertyChanged
 {
-    public DateTime? DateOfBirth { get; set; }
-    public DateTime? DateOfDeath { get; set; }
-    public DateTime? IssueDate { get; set; }
-    
-    public string? Sex { get; set; }
-    
     public Customer Customer { get; set; }
     private CustomerService _customerService;
 
@@ -35,9 +29,9 @@ public class AddPersonViewModel : INotifyPropertyChanged
     {
         return Customer.Name != null && Customer.Surname != null &&
                Customer.CertificateNumber != null && Customer.DeathCertificateNumber != null &&
-               Sex != null && Customer.Address != null && Customer.IssuedBy != null &&
+               Customer.Sex != null && Customer.Address != null && Customer.IssuedBy != null &&
                Customer.PlaceOfBirth != null && Customer.PlaceOfDeath != null &&
-               DateOfBirth != null && DateOfDeath != null & IssueDate != null
+               Customer.DateOfBirth != null && Customer.DateOfDeath != null & Customer.IssueDate != null
             ;
     }
 
@@ -45,10 +39,6 @@ public class AddPersonViewModel : INotifyPropertyChanged
     {
         if (ValidateCustomer())
         {
-            Customer.DateOfBirth = ConvertFromDateTime(DateOfBirth);
-            Customer.DateOfDeath = ConvertFromDateTime(DateOfDeath);
-            Customer.IssueDate = ConvertFromDateTime(IssueDate);
-            Customer.Sex = Sex.ToCharArray()[0];
             _customerService.AddCustomer(Customer);
             MessageBox.Show("Dane zmarłego pomyślnie dodane do bazy.", "Sukces");
             CustomerList.ReloadCustomers();
