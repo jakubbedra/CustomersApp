@@ -11,7 +11,12 @@ public class CustomerDbContext : DbContext
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var connectionString = "Server=localhost;Port=2137;Database=Customers-new;User Id=postgres;Password=admin;";
+        YamlPropertiesProvider provider = ServiceProvider.YamlPropertiesProviderInstance();
+        var connectionString = $"Server={provider.GetDbServer()};" +
+                               $"Port={provider.GetServerPort()};" +
+                               $"Database={provider.GetDbName()};" +
+                               $"User Id={provider.GetDbUserId()};" +
+                               $"Password={provider.GetDbPassword()};";
         optionsBuilder.UseNpgsql(connectionString);
     }
 }

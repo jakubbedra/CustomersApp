@@ -7,7 +7,8 @@ public static class ServiceProvider
     private static CustomerDbContext? _customerDbContext;
     private static CustomerService? _customerService;
     private static PdfService? _pdfService;
-
+    private static YamlPropertiesProvider? _propertiesProvider;
+    
     public static CustomerDbContext DbContextInstance()
     {
         if (_customerDbContext == null)
@@ -38,5 +39,15 @@ public static class ServiceProvider
         }
 
         return _pdfService;
+    }
+    
+    public static YamlPropertiesProvider YamlPropertiesProviderInstance()
+    {
+        if (_propertiesProvider == null)
+        {
+            _propertiesProvider = new YamlPropertiesProvider();
+        }
+
+        return _propertiesProvider;
     }
 }
