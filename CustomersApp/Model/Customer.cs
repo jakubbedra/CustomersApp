@@ -48,4 +48,10 @@ public class Customer
     [Column("address")]
     public string? Address { get; set; }
     
+    [Column("cremation_date")]
+    public DateOnly? CremationDate { get; set; }
+
+    [Column("extra")]
+    public string? Extra { get; set; }
+    
 }

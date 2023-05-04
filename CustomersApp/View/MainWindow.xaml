@@ -8,7 +8,7 @@
         xmlns:converters="clr-namespace:CustomersApp.ViewModel.Converters"
         mc:Ignorable="d"
         ResizeMode="NoResize"
-        Title="Baza zmarłych" Height="780" Width="1100">
+        Title="Księga Kremacji" Height="780" Width="1100">
     <Window.Resources>
         <viewModel:CustomerListViewModel x:Key="vm" />
         <converters:DateTimeToDateOnlyConverter x:Key="DateOnlyConverter" />
@@ -47,11 +47,12 @@
                     <ComboBoxItem Content="Adres zamieszkania" Tag="{x:Static viewModel:SearchCriteria.Address}"/>
                     <ComboBoxItem Content="Data urodzenia" Tag="{x:Static viewModel:SearchCriteria.DateOfBirth}"/>
                     <ComboBoxItem Content="Miejsce urodzenia" Tag="{x:Static viewModel:SearchCriteria.PlaceOfBirth}"/>
-                    <ComboBoxItem Content="Data śmierci" Tag="{x:Static viewModel:SearchCriteria.DateOfDeath}"/>
-                    <ComboBoxItem Content="Miejsce śmierci" Tag="{x:Static viewModel:SearchCriteria.PlaceOfDeath}"/>
+                    <ComboBoxItem Content="Data zgonu" Tag="{x:Static viewModel:SearchCriteria.DateOfDeath}"/>
+                    <ComboBoxItem Content="Miejsce zgonu" Tag="{x:Static viewModel:SearchCriteria.PlaceOfDeath}"/>
                     <ComboBoxItem Content="Numer aktu zgonu" Tag="{x:Static viewModel:SearchCriteria.DeathCertificateNumber}"/>
                     <ComboBoxItem Content="Akt zgonu wydany przez" Tag="{x:Static viewModel:SearchCriteria.IssuedBy}"/>
-                    <ComboBoxItem Content="Data wydania aktu zgonu" Tag="{x:Static viewModel:SearchCriteria.IssueDate}"/>
+                    <ComboBoxItem Content="Data zlecenia" Tag="{x:Static viewModel:SearchCriteria.IssueDate}"/>
+                    <ComboBoxItem Content="Data kremacji" Tag="{x:Static viewModel:SearchCriteria.CremationDate}"/>
                 </ComboBox>
             </StackPanel>
             <Button Grid.Row="1" Grid.Column="3" Click="OnAdd">Dodaj</Button>
@@ -182,7 +183,7 @@
                     </GridViewColumn>
                     
                     <GridViewColumn Width="100">
-                        <GridViewColumnHeader Content="Data śmierci">
+                        <GridViewColumnHeader Content="Data zgonu">
                             <GridViewColumnHeader.InputBindings>
                                 <MouseBinding
                                     MouseAction="LeftClick"
@@ -198,7 +199,7 @@
                     </GridViewColumn>
                     
                     <GridViewColumn Width="200">
-                        <GridViewColumnHeader Content="Miejsce śmierci">
+                        <GridViewColumnHeader Content="Miejsce zgonu">
                             <GridViewColumnHeader.InputBindings>
                                 <MouseBinding
                                     MouseAction="LeftClick"
@@ -246,7 +247,7 @@
                     </GridViewColumn>
                     
                     <GridViewColumn Width="100">
-                        <GridViewColumnHeader Content="Data wydania">
+                        <GridViewColumnHeader Content="Data zlecenia">
                             <GridViewColumnHeader.InputBindings>
                                 <MouseBinding
                                     MouseAction="LeftClick"
@@ -261,8 +262,24 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     
+                    <GridViewColumn Width="100">
+                        <GridViewColumnHeader Content="Data kremacji">
+                            <GridViewColumnHeader.InputBindings>
+                                <MouseBinding
+                                    MouseAction="LeftClick"
+                                    Command="{Binding SortListViewCommand}"
+                                    CommandParameter="CremationDate" />
+                            </GridViewColumnHeader.InputBindings>
+                        </GridViewColumnHeader>
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate DataType="{x:Type model:Customer}">
+                                <TextBlock Text="{Binding CremationDate, StringFormat=dd.MM.yyyy}"></TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    
                     <GridViewColumn Width="200">
-                        <GridViewColumnHeader Content="Adres">
+                        <GridViewColumnHeader Content="Adres zamieszkania">
                             <GridViewColumnHeader.InputBindings>
                                 <MouseBinding
                                     MouseAction="LeftClick"
@@ -303,12 +320,23 @@
             </Button>
             <Button
                 Grid.Column="0"
-                Margin="10"
+                IsEnabled="{Binding PdfButtonEnabled}"
+                Margin="10 , 10, 0, 0"
                 HorizontalAlignment="Left" VerticalAlignment="Top"
                 Height="30" Width="170"
                 Command="{Binding GeneratePdfCommand}">
                 Wygeneruj PDF
             </Button>
+            <StackPanel Grid.Column="0" Margin="10 , 0, 0, 66" HorizontalAlignment="Left" VerticalAlignment="Center" Width="170">
+                <ComboBox SelectedValue="{Binding PdfType}" SelectedValuePath="Tag" TextSearch.TextPath="" Height="32">
+                    <ComboBoxItem Content="Wybierz typ PDF" Tag="{x:Static viewModel:PdfType.NotSelected}"/>
+                    <ComboBoxItem Content="Osoba zmarła" Tag="{x:Static viewModel:PdfType.DeadPerson}"/>
+                    <ComboBoxItem Content="Osoba po ekshumacji" Tag="{x:Static viewModel:PdfType.DeadPersonExhumated}"/>
+                    <ComboBoxItem Content="Dziecko martwo narodzone" Tag="{x:Static viewModel:PdfType.ChildBornDead}"/>
+                    <ComboBoxItem Content="Płody martwo narodzone" Tag="{x:Static viewModel:PdfType.DeadFetus}"/>
+                    <ComboBoxItem Content="Ciała - szczątków ludzkich" Tag="{x:Static viewModel:PdfType.Remains}"/>
+                </ComboBox>
+            </StackPanel>
             <Grid Row="1" VerticalAlignment="Top">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -320,59 +348,70 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="70"></RowDefinition>
                         <RowDefinition Height="70"></RowDefinition>
-                        <RowDefinition Height="200"></RowDefinition>
+                        <RowDefinition Height="100"></RowDefinition>
+                        <RowDefinition Height="100"></RowDefinition>
                         <RowDefinition></RowDefinition>
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Grid.Column="0"  VerticalAlignment="Center" Width="120">
                 <Label Content="Numer świadectwa"/>
-                <TextBox Height="30" Text="{Binding SelectedCustomer.CertificateNumber}"/>
+                <TextBox Height="30" Text="{Binding SelectedCustomer.CertificateNumber}" TextChanged="OnCustomerEdit"/>
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="1"  VerticalAlignment="Center" Width="120">
                 <Label Content="Imię"/>
-                <TextBox Height="30" Text="{Binding SelectedCustomer.Name}"/>
+                <TextBox Height="30" Text="{Binding SelectedCustomer.Name}" TextChanged="OnCustomerEdit" />
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="2"  VerticalAlignment="Center" Width="120">
                 <Label Content="Nazwisko"/>
-                <TextBox Height="30" Text="{Binding SelectedCustomer.Surname}"/>
+                <TextBox Height="30" Text="{Binding SelectedCustomer.Surname}" TextChanged="OnCustomerEdit"/>
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="3"  VerticalAlignment="Center" Width="120">
                 <Label Content="Płeć"/>
-                <ComboBox SelectedValue="{Binding SelectedCustomer.Sex, Converter={StaticResource SexConverter}}" SelectedValuePath="Tag">
+                <ComboBox Height="30" 
+                          SelectedValue="{Binding SelectedCustomer.Sex, Converter={StaticResource SexConverter}}" 
+                          SelectedValuePath="Tag"
+                          SelectionChanged="OnCustomerEdit">
                     <ComboBoxItem Content="Kobieta" Tag="K"/>
                     <ComboBoxItem Content="Mężczyzna" Tag="M"/>
                 </ComboBox>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Width="120">
                 <Label Content="Data urodzenia"/>
-                <DatePicker Height="30" Text="" SelectedDate="{Binding SelectedCustomer.DateOfBirth, Mode=TwoWay, Converter={StaticResource DateOnlyConverter}}"></DatePicker>
+                <DatePicker Height="30" Text="" 
+                            SelectedDate="{Binding SelectedCustomer.DateOfBirth, Mode=TwoWay, Converter={StaticResource DateOnlyConverter}}"
+                            SelectedDateChanged="OnCustomerEdit"
+                            ></DatePicker>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="1" VerticalAlignment="Center" Width="120">
                 <Label Content="Miejsce urodzenia"/>
-                <TextBox Height="30" Text="{Binding SelectedCustomer.PlaceOfBirth}"/>
+                <TextBox Height="30" Text="{Binding SelectedCustomer.PlaceOfBirth}" TextChanged="OnCustomerEdit"/>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="2" VerticalAlignment="Center" Width="120">
-                <Label Content="Data śmierci"/>
-                <DatePicker Height="30" Text="" SelectedDate="{Binding SelectedCustomer.DateOfDeath, Mode=TwoWay, Converter={StaticResource DateOnlyConverter}}"></DatePicker>
+                <Label Content="Data zgonu"/>
+                <DatePicker Height="30" Text="" SelectedDateChanged="OnCustomerEdit" SelectedDate="{Binding SelectedCustomer.DateOfDeath, Mode=TwoWay, Converter={StaticResource DateOnlyConverter}}"></DatePicker>
             </StackPanel>
             <StackPanel Grid.Row="1" Grid.Column="3" VerticalAlignment="Center" Width="120">
-                <Label Content="Miejsce śmieci"/>
-                <TextBox Height="30" Text="{Binding SelectedCustomer.PlaceOfDeath}"/>
+                <Label Content="Miejsce zgonu"/>
+                <TextBox Height="30" Text="{Binding SelectedCustomer.PlaceOfDeath}" TextChanged="OnCustomerEdit"/>
             </StackPanel>
             <StackPanel Grid.Row="2" Grid.Column="0" VerticalAlignment="Center" Width="120" Height="100">
                 <Label Content="Numer aktu zgonu"/>
-                <TextBox Height="50" Text="{Binding SelectedCustomer.DeathCertificateNumber}"/>
+                <TextBox Height="30" Text="{Binding SelectedCustomer.DeathCertificateNumber}" TextChanged="OnCustomerEdit"/>
             </StackPanel>
             <StackPanel Grid.Row="2" Grid.Column="1" VerticalAlignment="Center" Width="120" Height="100">
-                <Label Content="Wydanego przez"/>
-                <TextBox Height="50" Text="{Binding SelectedCustomer.IssuedBy}"/>
+                <Label Content="Akt wydany przez"/>
+                <TextBox Height="30" Text="{Binding SelectedCustomer.IssuedBy}" TextChanged="OnCustomerEdit"/>
             </StackPanel>
             <StackPanel Grid.Row="2" Grid.Column="2" VerticalAlignment="Center" Width="120" Height="100">
-                <Label Content="Data wydania"/>
-                <DatePicker Height="30" Text="" SelectedDate="{Binding SelectedCustomer.IssueDate, Mode=TwoWay, Converter={StaticResource DateOnlyConverter}}"></DatePicker>
+                <Label Content="Data zlecenia"/>
+                <DatePicker Height="30" Text="" SelectedDateChanged="OnCustomerEdit" SelectedDate="{Binding SelectedCustomer.IssueDate, Mode=TwoWay, Converter={StaticResource DateOnlyConverter}}"></DatePicker>
             </StackPanel>
-            <StackPanel Grid.Row="2" Grid.Column="3" VerticalAlignment="Center" Width="120" Height="100">
-                <Label Content="Adres"/>
-                <TextBox Height="50" Text="{Binding SelectedCustomer.Address}"/>
+                    <StackPanel Grid.Row="2" Grid.Column="3" VerticalAlignment="Center" Width="120" Height="100">
+                <Label Content="Data kremacji"/>
+                <DatePicker Height="30" Text="" SelectedDateChanged="OnCustomerEdit" SelectedDate="{Binding SelectedCustomer.CremationDate, Mode=TwoWay, Converter={StaticResource DateOnlyConverter}}"></DatePicker>
+            </StackPanel>
+            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Width="250" Height="100">
+                <Label Content="Uwagi"/>
+                <TextBox Height="50" Text="{Binding SelectedCustomer.Extra}" TextChanged="OnCustomerEdit"/>
             </StackPanel>
                 </Grid>
             </Grid>

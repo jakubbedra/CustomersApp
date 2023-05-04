@@ -12,5 +12,6 @@ public enum SearchCriteria
     PlaceOfDeath,
     DeathCertificateNumber,
     IssueDate,
+    CremationDate,
     IssuedBy
 }

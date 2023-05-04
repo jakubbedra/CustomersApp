@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
+using CustomersApp.View;
 using CustomersApp.ViewModel.Commands;
 
 namespace CustomersApp.ViewModel;
@@ -35,6 +36,8 @@ public class PasswordViewModel : INotifyPropertyChanged
         }
     }
 
+    public PasswordWindow Window { get; set; }
+
     private YamlPropertiesProvider _provider;
 
     public ICommand ValidatePasswordCommand {get; set;}
@@ -58,7 +61,9 @@ public class PasswordViewModel : INotifyPropertyChanged
         }
         else
         {
-            ValidationError = "dupa";
+            MainWindow window = new MainWindow();
+            window.Show();
+            Window.Close();
         }
     }
     

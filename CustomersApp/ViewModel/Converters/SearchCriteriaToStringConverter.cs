@@ -31,13 +31,15 @@ public class SearchCriteriaToStringConverter : IValueConverter
                 case SearchCriteria.PlaceOfBirth:
                     return $"Wyszukiwanie (Miejsce urodzenia)";
                 case SearchCriteria.DateOfDeath:
-                    return $"Wyszukiwanie (Data śmierci)";
+                    return $"Wyszukiwanie (Data zgonu)";
                 case SearchCriteria.PlaceOfDeath:
-                    return $"Wyszukiwanie (Miejsce śmierci)";
+                    return $"Wyszukiwanie (Miejsce zgonu)";
                 case SearchCriteria.DeathCertificateNumber:
-                    return $"Wyszukiwanie (Nume raktu zgonu)";
+                    return $"Wyszukiwanie (Numer aktu zgonu)";
                 case SearchCriteria.IssueDate:
-                    return $"Wyszukiwanie (Data wydania aktu zgonu)";
+                    return $"Wyszukiwanie (Data zlecenia)";
+                case SearchCriteria.CremationDate:
+                    return $"Wyszukiwanie (Data kremacji)";
                 case SearchCriteria.IssuedBy:
                     return $"Wyszukiwanie (Akt zgonu wydany przez)";
                 default:

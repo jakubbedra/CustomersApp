@@ -35,6 +35,8 @@ public class AddPersonViewModel : INotifyPropertyChanged
     public AddPersonViewModel()
     {
         Customer = new Customer();
+        Customer.IssuedBy = "USC w Gdańsku";
+        Customer.Address = "";
         EmptyFields = "";
         _customerService = ServiceProvider.CustomerServiceInstance();
         AddCustomerCommand = new AddCustomerCommand(this);
@@ -63,14 +65,9 @@ public class AddPersonViewModel : INotifyPropertyChanged
             validationErrors.Add("Numer aktu zgonu");
         }
 
-        if (Customer.Sex != 'K' || Customer.Sex != 'M')
+        if (Customer.Sex != 'K' && Customer.Sex != 'M')
         {
             validationErrors.Add("Płeć");
-        }
-
-        if (Customer.Address == null)
-        {
-            validationErrors.Add("Adres");
         }
 
         if (Customer.IssuedBy == null)
@@ -85,7 +82,7 @@ public class AddPersonViewModel : INotifyPropertyChanged
 
         if (Customer.PlaceOfDeath == null)
         {
-            validationErrors.Add("Miejsce śmierci");
+            validationErrors.Add("Miejsce zgonu");
         }
 
         if (Customer.DateOfBirth == null)
@@ -95,14 +92,21 @@ public class AddPersonViewModel : INotifyPropertyChanged
 
         if (Customer.DateOfDeath == null)
         {
-            validationErrors.Add("Data śmierci");
+            validationErrors.Add("Data zgonu");
         }
 
         if (Customer.IssueDate == null)
         {
-            validationErrors.Add("Data wydania");
+            validationErrors.Add("Data zlecenia");
+        }
+        
+        if (Customer.CremationDate == null)
+        {
+            validationErrors.Add("Data kremacji");
         }
 
+        Customer.Extra ??= "";
+        
         return validationErrors;
     }
 

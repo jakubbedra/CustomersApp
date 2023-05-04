@@ -44,6 +44,19 @@ public class CustomerListViewModel : INotifyPropertyChanged
             if (_selectedCustomer != null)
                 SelectedCustomerState = $"{_selectedCustomer.Name} {_selectedCustomer.Surname}";
             OnPropertyChanged(nameof(SelectedCustomer));
+            _unsavedChanges = false;
+        }
+    }
+
+    private bool _unsavedChanges;
+
+    public bool UnsavedChanges
+    {
+        get { return _unsavedChanges; }
+        set
+        {
+            _unsavedChanges = value;
+            OnPropertyChanged(nameof(UnsavedChanges));
         }
     }
 
@@ -77,6 +90,24 @@ public class CustomerListViewModel : INotifyPropertyChanged
         }
     }
 
+    private PdfType _pdfType;
+
+    public PdfType PdfType
+    {
+        get { return _pdfType; }
+        set
+        {
+            _pdfType = value;
+            OnPropertyChanged(nameof(PdfType));
+            OnPropertyChanged(nameof(PdfButtonEnabled));
+        }
+    }
+
+    public bool PdfButtonEnabled
+    {
+        get { return PdfType != PdfType.NotSelected; }
+    }
+
     private CustomerService _customerService;
     private PdfService _pdfService;
 
@@ -87,6 +118,7 @@ public class CustomerListViewModel : INotifyPropertyChanged
         SelectedSearchCriteria = SearchCriteria.NameAndSurname;
         CustomerFilter = string.Empty;
         _customerService = ServiceProvider.CustomerServiceInstance();
+        _unsavedChanges = false;
         _pdfService = ServiceProvider.PdfServiceInstance();
         SortListViewCommand = new SortListViewCommand(this);
         RefreshCustomersCommand = new RefreshCustomersCommand(this);
@@ -96,6 +128,7 @@ public class CustomerListViewModel : INotifyPropertyChanged
         Customers = new ObservableCollection<Customer>(_customerService.FindAll());
         CollectionView.Filter = FilterCustomers;
         SelectedCustomerState = StateNoData;
+        _pdfType = PdfType.NotSelected;
     }
 
     public void SortCustomers(string columnName)
@@ -155,6 +188,8 @@ public class CustomerListViewModel : INotifyPropertyChanged
                     return FilterDate(customer.DateOfDeath);
                 case SearchCriteria.IssueDate:
                     return FilterDate(customer.IssueDate);
+                case SearchCriteria.CremationDate:
+                    return FilterDate(customer.CremationDate);
                 default:
                     return false;
             }
@@ -170,6 +205,14 @@ public class CustomerListViewModel : INotifyPropertyChanged
             return false;
         }
 
+        string dateAsString = date.Value.ToString("dd.MM.yyyy");
+        return FilterNormalString(dateAsString);
+        /*
+        if (date == null)
+        {
+            return false;
+        }
+
         DateTime dateTime;
         if (DateTime.TryParseExact(CustomerFilter, "dd.MM.yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None,
                 out dateTime))
@@ -178,7 +221,7 @@ public class CustomerListViewModel : INotifyPropertyChanged
             return filterDate == date;
         }
 
-        return false;
+        return false;*/
     }
 
     private bool FilterNormalString(string? value)
@@ -273,7 +316,7 @@ public class CustomerListViewModel : INotifyPropertyChanged
 
     public void GeneratePdf()
     {
-        if (_selectedCustomer != null)
+        if (_selectedCustomer != null && !_unsavedChanges)
         {
             var dialog = new Microsoft.Win32.SaveFileDialog();
             dialog.Filter = "Pliki Dukumentów (*.pdf)|*.pdf|Wszystkie Pliki (*.*)|*.*";
@@ -285,12 +328,17 @@ public class CustomerListViewModel : INotifyPropertyChanged
             if (result == true)
             {
                 path = dialog.FileName;
-                _pdfService.GeneratePdf(_selectedCustomer, path);
+                _pdfService.GeneratePdf(_selectedCustomer, PdfType, path);
             }
         }
-        else
+        else if (_selectedCustomer == null)
         {
             MessageBox.Show("Proszę wybrać dane zmarłego aby móc wygenerować plik PDF", "Nie wybrano danych",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        else if (_unsavedChanges)
+        {
+            MessageBox.Show("Proszę zapisać zmiany aby móc wygenerować plik PDF", "Nie zapisano zmian",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
@@ -301,6 +349,7 @@ public class CustomerListViewModel : INotifyPropertyChanged
         {
             _customerService.UpdateCustomer(_selectedCustomer);
             SelectedCustomerState = $"{_selectedCustomer.Name} {_selectedCustomer.Surname}";
+            _unsavedChanges = false;
             MessageBox.Show("Zapisywanie zmian ukończone pomyślnie!", "Sukces", MessageBoxButton.OK,
                 MessageBoxImage.Information);
         }

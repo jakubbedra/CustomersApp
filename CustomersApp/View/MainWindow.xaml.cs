@@ -20,5 +20,11 @@ namespace CustomersApp
             AddPersonWindow window = new AddPersonWindow(viewModel);
             window.Show();
         }
+
+        private void OnCustomerEdit(object sender, RoutedEventArgs e)
+        {
+            CustomerListViewModel viewModel = (CustomerListViewModel)MainGrid.DataContext;
+            viewModel.UnsavedChanges = true;
+        }
     }
 }
