@@ -354,7 +354,7 @@
                     </Grid.RowDefinitions>
                     <StackPanel Grid.Row="0" Grid.Column="0"  VerticalAlignment="Center" Width="120">
                 <Label Content="Numer świadectwa"/>
-                <TextBox Height="30" Text="{Binding SelectedCustomer.CertificateNumber}" TextChanged="OnCustomerEdit"/>
+                <TextBox Height="30" IsReadOnly="True" Text="{Binding SelectedCustomer.CertificateNumber}"/>
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="1"  VerticalAlignment="Center" Width="120">
                 <Label Content="Imię"/>

@@ -34,12 +34,13 @@ public class AddPersonViewModel : INotifyPropertyChanged
 
     public AddPersonViewModel()
     {
+        _customerService = ServiceProvider.CustomerServiceInstance();
+        AddCustomerCommand = new AddCustomerCommand(this);
         Customer = new Customer();
+        Customer.CertificateNumber = _customerService.CreateNewCertificateNumber();
         Customer.IssuedBy = "USC w Gdańsku";
         Customer.Address = "";
         EmptyFields = "";
-        _customerService = ServiceProvider.CustomerServiceInstance();
-        AddCustomerCommand = new AddCustomerCommand(this);
     }
 
     public List<string> ValidateCustomer()
@@ -118,7 +119,7 @@ public class AddPersonViewModel : INotifyPropertyChanged
         {
             _customerService.AddCustomer(Customer);
             MessageBox.Show("Dane zmarłego pomyślnie dodane do bazy.", "Sukces");
-            CustomerList.ReloadCustomers();
+            CustomerList.UpdateCustomersOnAdd();//todo: zamiast wszystkiego wczytywac, dodawac tylko ostatniego zmarlego do listy
             Window.Close();
         }
         else

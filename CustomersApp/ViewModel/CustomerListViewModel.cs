@@ -277,6 +277,18 @@ public class CustomerListViewModel : INotifyPropertyChanged
             Customers.Add(customer);
         }
     }
+    
+    public void UpdateCustomersOnAdd()
+    {
+        Customer? customer = _customerService.FindLast();
+        Customers.Add(customer);
+    }
+    
+    public void UpdateCustomersOnDelete(long id)
+    {
+        Customer? customer = Customers.FirstOrDefault(c => c.Id == id);
+        Customers.Remove(customer);
+    }
 
     public void DeleteSelectedCustomer()
     {
@@ -290,7 +302,8 @@ public class CustomerListViewModel : INotifyPropertyChanged
             {
                 _customerService.DeleteCustomer(_selectedCustomer.Id);
                 RefreshCustomers();
-                ReloadCustomers();
+                //ReloadCustomers();
+                UpdateCustomersOnDelete(_selectedCustomer.Id);
                 SelectedCustomer = EmptyCustomer();
                 SelectedCustomerState = StateNoData;
             }

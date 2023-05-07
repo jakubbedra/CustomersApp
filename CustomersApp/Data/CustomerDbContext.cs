@@ -6,7 +6,8 @@ namespace CustomersApp;
 public class CustomerDbContext : DbContext
 {
     public DbSet<Customer> Customers { get; set; }
-    
+    public DbSet<YearStats> YearStats { get; set; }
+
     public CustomerDbContext() : base(){}
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -19,4 +20,5 @@ public class CustomerDbContext : DbContext
                                $"Password={provider.GetDbPassword()};";
         optionsBuilder.UseNpgsql(connectionString);
     }
+
 }
